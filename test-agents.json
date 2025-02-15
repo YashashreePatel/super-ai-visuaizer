@@ -41,6 +41,20 @@
       },
       "positionX": 600,
       "positionY": 300
+    },
+    {
+      "agent_id": "agent_4",
+      "parent_id": "agent_3",
+      "related_agents": [],
+      "role_name": "XYZBudget Planning Agent",
+      "system_prompt": "XYZPlan marketing budgets for campaigns.",
+      "task_prompt": "Allocate budget for different marketing channels.",
+      "metadata": {
+        "creation_timestamp": "2023-10-01T12:10:00Z",
+        "llm_used": "Ollama"
+      },
+      "positionX": 400,
+      "positionY": 600
     }
   ]
 }

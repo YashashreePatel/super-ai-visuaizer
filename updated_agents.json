@@ -7,7 +7,7 @@
         "agent_2",
         "agent_3"
       ],
-      "role_name": "Research Agent",
+      "role_name": "Market Agent",
       "system_prompt": "Conduct market research for new product launches.",
       "task_prompt": "Analyze market trends and customer preferences.",
       "metadata": {
@@ -24,7 +24,7 @@
         "agent_4"
       ],
       "role_name": "Content Creation Agent",
-      "system_prompt": "Create marketing content for campaigns.",
+      "system_prompt": " content for campaigns.",
       "task_prompt": "Develop blog posts, social media content, and ads.",
       "metadata": {
         "creation_timestamp": "2023-10-01T12:05:00Z",
@@ -38,7 +38,7 @@
       "parent_id": "agent_1",
       "related_agents": [],
       "role_name": "Budget Planning Agent",
-      "system_prompt": "Plan markgns.",
+      "system_prompt": "Plan marketing budgets for campaigns.",
       "task_prompt": "Allocate budget for different marketing channels.",
       "metadata": {
         "creation_timestamp": "2023-10-01T12:10:00Z",
