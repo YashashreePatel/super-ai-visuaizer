@@ -8,6 +8,9 @@ export default {
   ],
   theme: {
     extend: {
+      borderWidth: {
+        'dashed': '2px dashed 5px',
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",

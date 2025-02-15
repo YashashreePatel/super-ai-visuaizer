@@ -10,6 +10,8 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { Agent } from "@/types"; // Your Agent interface
 import AgentSidebar from "@/components/AgentSidebar";
+import styles from "../style.module.css";
+import "@/app/globals.css";
 
 interface Props {
   data: { agents: Agent[] };
@@ -17,7 +19,7 @@ interface Props {
 }
 
 const AgentGraph: React.FC<Props> = ({ data, onUpdatedData }) => {
-  
+  const defaultViewport = { x: 0, y: 0, zoom: 1.5 };
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
@@ -31,20 +33,17 @@ const AgentGraph: React.FC<Props> = ({ data, onUpdatedData }) => {
       id: agent.agent_id,
       data: {
         label: (
-          <div
-            style={{
-              background: "#fff",
-              padding: "10px",
-              borderRadius: "8px",
-              border: "1px solid #ccc",
-              boxShadow: "2px 2px 10px rgba(0,0,0,0.1)",
-              textAlign: "center",
-            }}
-          >
-            <strong>{agent.role_name}</strong> <br />
-            <small>ID: {agent.agent_id}</small> <br />
-            <em>System: {agent.system_prompt}</em> <br />
-            <em>Task: {agent.task_prompt}</em>
+          <div className={`${styles.node}`}>
+            <div className={`${styles.node_id}`}>
+              ID: {agent.agent_id}
+            </div>
+            <div className={`${styles.node_head}`}>
+              {agent.role_name}
+            </div>
+            <div className={`${styles.node_body}`}>
+              <div> System: {agent.system_prompt} </div>
+              <div> Task: {agent.task_prompt} </div>
+            </div>
           </div>
         ),
         role_name: agent.role_name,
@@ -64,9 +63,7 @@ const AgentGraph: React.FC<Props> = ({ data, onUpdatedData }) => {
     );
 
     setNodes(newNodes);
-    console.log("nodesssssalll:", nodes);
     setEdges(newEdges);
-    console.log("edgessssalll:", edges);
 
     onUpdatedData(updatedData);
   }, [data, updatedData, onUpdatedData]);
@@ -86,11 +83,9 @@ const AgentGraph: React.FC<Props> = ({ data, onUpdatedData }) => {
   // Function to update the node data from the sidebar
   const updateNodeData = useCallback(
     (updatedRoleName: string, updatedSystemPrompt: string, updatedTaskPrompt: string) => {
-      console.log("updatedroleeee::::", updatedRoleName);
       
       // Optionally update the selected node's data here if you need to reflect changes in the graph
       if (selectedNode) {
-        console.log("selecteddddd::::", selectedNode.id);
         setNodes((nds) =>
           nds.map((node) =>
             node.id === selectedNode.id
@@ -102,19 +97,10 @@ const AgentGraph: React.FC<Props> = ({ data, onUpdatedData }) => {
                     system_prompt: updatedSystemPrompt,
                     task_prompt: updatedTaskPrompt,
                     label: (
-                      <div
-                        style={{
-                          background: "#fff",
-                          padding: "10px",
-                          borderRadius: "8px",
-                          border: "1px solid #ccc",
-                          boxShadow: "2px 2px 10px rgba(0,0,0,0.1)",
-                          textAlign: "center",
-                        }}
-                      >
-                        <strong>{updatedRoleName}</strong> <br />
-                        <small>ID: {selectedNode.id}</small> <br />
-                        <em>System: {updatedSystemPrompt}</em> <br />
+                      <div className={`${styles.nodes}`}>
+                        <strong>{updatedRoleName}</strong>
+                        <small>ID: {selectedNode.id}</small>
+                        <em>System: {updatedSystemPrompt}</em>
                         <em>Task: {updatedTaskPrompt}</em>
                       </div>
                     ),
@@ -123,8 +109,6 @@ const AgentGraph: React.FC<Props> = ({ data, onUpdatedData }) => {
               : node
           )
         );
-
-        console.log("nodeeeesssss::::", nodes[0].id);
 
         setUpdatedData((prevData) => ({
           agents: prevData.agents.map((agent) =>
@@ -138,27 +122,34 @@ const AgentGraph: React.FC<Props> = ({ data, onUpdatedData }) => {
               : agent
           ),
         }));
-        console.log("updatedddd;::::", updatedData);
       }
     }, [selectedNode]
   );
 
   return (
-    <div className="flex h-screen">
-      <div className="w-3/4 h-full">
+    <div className="relative flex h-screen items-center justify-center">
+      <div className="w-full h-full">
         <ReactFlow
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onNodeClick={(_, node) => setSelectedNode(node)}
+          defaultViewport={defaultViewport}
+          minZoom={0.2}
+          maxZoom={4}
+          attributionPosition="bottom-left"
           fitView
+          fitViewOptions={{ padding: 0.5 }}
+          
         >
           <Controls />
           <Background />
         </ReactFlow>
       </div>
-      <AgentSidebar node={selectedNode} updateNodeData={updateNodeData} />
+      <div className={`absolute top-[250px] right-[50px] w-[400px] ${selectedNode ? '' : 'hidden'} p-4 items-center bg-white text-[#3D3D3D] rounded-[10px] z-10`}>
+        <AgentSidebar node={selectedNode} updateNodeData={updateNodeData} />
+      </div>
     </div>
   );
 };

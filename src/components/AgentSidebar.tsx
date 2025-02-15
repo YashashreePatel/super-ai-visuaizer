@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Node } from "reactflow";
+import styles from "../style.module.css";
 
 interface AgentSidebarProps {
   node?: Node | null;
@@ -28,29 +29,33 @@ const AgentSidebar: React.FC<AgentSidebarProps> = ({ node, updateNodeData }) => 
   if (!node) return <div className="w-1/4 p-4 border-l">Select an agent to edit</div>;
 
   return (
-    <div className="w-1/4 p-4 border-l">
-      <h2 className="text-xl font-bold">Edit Agent</h2>
-      <label className="block mt-2">Role Name</label>
-      <input
-        name="role_name"
-        value={roleName}
-        onChange={(e) => setRoleName(e.target.value)} // Update role name
-        className="w-full border p-2 text-black"
-      />
-      
-      <label className="block mt-2">System Prompt</label>
-      <textarea
-        value={systemPrompt}
-        onChange={(e) => setSystemPrompt(e.target.value)} // Update system prompt
-        className="w-full border p-2 text-black"
-      />
-
-      <label className="block mt-2">Task Prompt</label>
-      <textarea
-        value={taskPrompt}
-        onChange={(e) => setTaskPrompt(e.target.value)} // Update task prompt
-        className="w-full border p-2 text-black"
-      />
+    <div className="w-full flex flex-col gap-4 items-center">
+      <h1 className="text-xl font-bold mb-2">Edit Agent</h1>
+      <div className="w-full flex flex-col gap-1">
+        <label>Role Name</label>
+        <input
+          name="role_name"
+          value={roleName}
+          onChange={(e) => setRoleName(e.target.value)} // Update role name
+          className={`${styles.input}`}
+        />
+      </div>
+      <div className="w-full flex flex-col gap-1">
+        <label>System Prompt</label>
+        <textarea
+          value={systemPrompt}
+          onChange={(e) => setSystemPrompt(e.target.value)} // Update system prompt
+          className={`${styles.input}`}
+        />
+      </div>
+      <div className="w-full flex flex-col gap-1">
+        <label>Task Prompt</label>
+        <textarea
+          value={taskPrompt}
+          onChange={(e) => setTaskPrompt(e.target.value)} // Update task prompt
+          className={`${styles.input}`}
+        />
+      </div>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
+import styles from "../style.module.css"
 
 interface JsonUploaderProps {
   onUpload: (data: any) => void;
@@ -37,12 +38,12 @@ const JsonUploader: React.FC<JsonUploaderProps> = ({ onUpload, updatedData }) =>
   
 
   return (
-    <div>
-      <div {...getRootProps()} className="border-2 border-dashed p-6 text-center cursor-pointer">
+    <div className={`flex ${updatedData ? 'flex-row' : 'flex-col'} gap-6 items-center`}>
+      <div {...getRootProps()} className={`${updatedData ? 'px-6 py-2' : 'px-12 py-6'} text-center ${styles.upload_border} !cursor-pointer`}>
         <input {...getInputProps()} />
-        <p>Drag & drop a JSON file here, or click to select</p>
+        <p>Drag files here or <span className="text-blue-600">browse</span></p>
       </div>
-      <button onClick={handleExport} className="my-10 px-4 py-2 bg-blue-600 text-white">Export JSON</button>
+      <button onClick={handleExport} className={`${updatedData ? '' : 'hidden'} px-6 py-2 bg-blue-600 text-white rounded-[5px]`}>Export JSON</button>
     </div>
   );
 };
