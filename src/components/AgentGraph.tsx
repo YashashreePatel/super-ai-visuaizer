@@ -53,13 +53,24 @@ const AgentGraph: React.FC<Props> = ({ data, onUpdatedData }) => {
       position: { x: agent.positionX, y: agent.positionY },
     }));
 
+    // const newEdges: Edge[] = updatedData.agents.flatMap((agent) =>
+    //   agent.related_agents.map((relatedAgent) => ({
+    //     id: `${agent.agent_id}-${relatedAgent}`,
+    //     source: agent.agent_id,
+    //     target: relatedAgent,
+    //     animated: true,
+    //   }))
+    // );
+
     const newEdges: Edge[] = updatedData.agents.flatMap((agent) =>
-      agent.related_agents.map((relatedAgent) => ({
-        id: `${agent.agent_id}-${relatedAgent}`,
-        source: agent.agent_id,
-        target: relatedAgent,
-        animated: true,
-      }))
+      agent.parent_id
+        ? [{
+            id: `${agent.parent_id}-${agent.agent_id}`,
+            source: agent.parent_id,
+            target: agent.agent_id,
+            animated: true,
+          }]
+        : []
     );
 
     setNodes(newNodes);
