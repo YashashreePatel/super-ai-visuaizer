@@ -13,9 +13,11 @@ import AgentSidebar from "@/components/AgentSidebar";
 import styles from "../style.module.css";
 import "@/app/globals.css";
 
+import nodeLayout from "@/utils/nodeLayout"; // Updated nodeLayout import
+
 interface Props {
   data: { agents: Agent[] };
-  onUpdatedData: (daya: { agents: Agent[] }) => void;
+  onUpdatedData: (data: { agents: Agent[] }) => void;
 }
 
 const AgentGraph: React.FC<Props> = ({ data, onUpdatedData }) => {
@@ -23,9 +25,10 @@ const AgentGraph: React.FC<Props> = ({ data, onUpdatedData }) => {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
-  const [updatedData, setUpdatedData] = useState<{ agents: Agent[] }>({ agents: data.agents });
+  const [updatedData, setUpdatedData] = useState<{ agents: Agent[] }>({
+    agents: data.agents,
+  });
 
-  // Initialize nodes and edges based on data
   useEffect(() => {
     if (!updatedData?.agents) return;
 
@@ -34,15 +37,11 @@ const AgentGraph: React.FC<Props> = ({ data, onUpdatedData }) => {
       data: {
         label: (
           <div className={`${styles.node}`}>
-            <div className={`${styles.node_id}`}>
-              ID: {agent.agent_id}
-            </div>
-            <div className={`${styles.node_head}`}>
-              {agent.role_name}
-            </div>
+            <div className={`${styles.node_id}`}>ID: {agent.agent_id}</div>
+            <div className={`${styles.node_head}`}>{agent.role_name}</div>
             <div className={`${styles.node_body}`}>
-              <div> System: {agent.system_prompt} </div>
-              <div> Task: {agent.task_prompt} </div>
+              <div>System: {agent.system_prompt}</div>
+              <div>Task: {agent.task_prompt}</div>
             </div>
           </div>
         ),
@@ -50,52 +49,44 @@ const AgentGraph: React.FC<Props> = ({ data, onUpdatedData }) => {
         system_prompt: agent.system_prompt,
         task_prompt: agent.task_prompt,
       },
-      position: { x: agent.positionX, y: agent.positionY },
+      position: { x: 0, y: 0 }, // Temporary placeholder, will be updated
     }));
-
-    // const newEdges: Edge[] = updatedData.agents.flatMap((agent) =>
-    //   agent.related_agents.map((relatedAgent) => ({
-    //     id: `${agent.agent_id}-${relatedAgent}`,
-    //     source: agent.agent_id,
-    //     target: relatedAgent,
-    //     animated: true,
-    //   }))
-    // );
 
     const newEdges: Edge[] = updatedData.agents.flatMap((agent) =>
       agent.parent_id
-        ? [{
-            id: `${agent.parent_id}-${agent.agent_id}`,
-            source: agent.parent_id,
-            target: agent.agent_id,
-            animated: true,
-          }]
+        ? [
+            {
+              id: `${agent.parent_id}-${agent.agent_id}`,
+              source: agent.parent_id,
+              target: agent.agent_id,
+              type: 'smoothstep',
+              animated: true,
+            },
+          ]
         : []
     );
 
-    setNodes(newNodes);
+    // Asynchronous layout calculation inside useEffect
+    nodeLayout(newNodes, newEdges).then((layoutedNodes) => {
+      setNodes(layoutedNodes);
+    });
+
     setEdges(newEdges);
-
     onUpdatedData(updatedData);
-  }, [data, updatedData, onUpdatedData]);
+  }, [updatedData, onUpdatedData]);
 
-  // Handle node changes
   const onNodesChange = useCallback(
     (changes: any) => setNodes((nds) => applyNodeChanges(changes, nds)),
     []
   );
 
-  // Handle edge changes
   const onEdgesChange = useCallback(
     (changes: any) => setEdges((eds) => applyEdgeChanges(changes, eds)),
     []
   );
 
-  // Function to update the node data from the sidebar
   const updateNodeData = useCallback(
     (updatedRoleName: string, updatedSystemPrompt: string, updatedTaskPrompt: string) => {
-      
-      // Optionally update the selected node's data here if you need to reflect changes in the graph
       if (selectedNode) {
         setNodes((nds) =>
           nds.map((node) =>
@@ -134,7 +125,8 @@ const AgentGraph: React.FC<Props> = ({ data, onUpdatedData }) => {
           ),
         }));
       }
-    }, [selectedNode]
+    },
+    [selectedNode]
   );
 
   return (
@@ -152,13 +144,14 @@ const AgentGraph: React.FC<Props> = ({ data, onUpdatedData }) => {
           attributionPosition="bottom-left"
           fitView
           fitViewOptions={{ padding: 0.5 }}
-          
         >
           <Controls />
           <Background />
         </ReactFlow>
       </div>
-      <div className={`absolute top-[250px] right-[50px] w-[400px] ${selectedNode ? '' : 'hidden'} p-4 items-center bg-white text-[#3D3D3D] rounded-[10px] z-10`}>
+      <div
+        className={`absolute top-[250px] right-[50px] w-[400px] ${selectedNode ? "" : "hidden"} p-4 items-center bg-white text-[#3D3D3D] rounded-[10px] z-10`}
+      >
         <AgentSidebar node={selectedNode} updateNodeData={updateNodeData} />
       </div>
     </div>

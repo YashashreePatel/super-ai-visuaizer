@@ -1,78 +1,66 @@
-import { Agent, NodeData, EdgeData } from "@/types";
-import React from "react";
+import ELK from "elkjs";
+import { Node, Edge } from "reactflow";
 
-export const getPyramidLayout = (agents: Agent[]) => {
-  const nodeMap = new Map<string, Agent>();
-  const nodes: NodeData[] = [];
-  const edges: EdgeData[] = [];
+// Initialize ELK with default configurations
+const elk = new ELK({
+  defaultLayoutOptions: {
+    'elk.algorithm': 'layered',  // Options: layered, force, radial, etc.
+    'elk.direction': 'DOWN',     // Layout direction
+    'elk.layered.spacing.nodeNodeBetweenLayers': '100',
+    'elk.spacing.nodeNode': '80', // Spacing between nodes
+  },
+});
 
-  // Create a map of agents
-  agents.forEach((agent) => {
-    nodeMap.set(agent.agent_id, agent);
-  });
+interface ElkNode {
+  id: string;
+  x?: number;
+  y?: number;
+  children?: ElkNode[];
+}
 
-  // Define hierarchy levels
-  const levels = new Map<number, Agent[]>();
-  let maxDepth = 0;
+/**
+ * Auto-layout function to position ReactFlow nodes using ELK.js
+ */
+const nodeLayout = async (nodes: Node[], edges: Edge[]) => {
+  // Convert ReactFlow nodes to ELK format
+  const elkNodes: ElkNode[] = nodes.map(node => ({
+    id: node.id,
+    width: node.width || 250,
+    height: Math.max(180, node.data?.label?.length || 0 / 5),
+  }));
 
-  // Assign levels based on parent-child hierarchy
-  const assignLevels = (agent: Agent, level = 0) => {
-    if (!levels.has(level)) levels.set(level, []);
-    levels.get(level)?.push(agent);
-    maxDepth = Math.max(maxDepth, level);
+  // Convert ReactFlow edges to ELK format
+  const elkEdges = edges.map(edge => ({
+    id: edge.id,
+    sources: [edge.source],
+    targets: [edge.target],
+  }));
 
-    agents.forEach((child) => {
-      if (child.parent_id === agent.agent_id) {
-        assignLevels(child, level + 1);
-      }
-    });
+  // Define the graph structure
+  const graph = {
+    id: "root",
+    children: elkNodes,
+    edges: elkEdges,
   };
 
-  // Find root nodes and initiate hierarchy assignment
-  agents.forEach((agent) => {
-    if (!agent.parent_id) {
-      assignLevels(agent);
-    }
-  });
-
-  // Generate positions dynamically for pyramid layout
-  const ySpacing = 150;
-  const xSpacing = 250;
-
-  levels.forEach((agentsAtLevel, level) => {
-    const y = level * ySpacing;
-    const xStart = -((agentsAtLevel.length - 1) * xSpacing) / 2;
-
-    agentsAtLevel.forEach((agent, index) => {
-      nodes.push({
-        id: agent.agent_id,
-        position: { x: xStart + index * xSpacing, y },
-        data: {
-          label: React.createElement(
-            "div",
-            {},
-            React.createElement("strong", {}, index),
-            React.createElement("br"),
-            React.createElement("strong", {}, agent.role_name),
-            React.createElement("br"),
-            React.createElement("small", {}, `ID: ${agent.agent_id}`),
-            React.createElement("br"),
-            React.createElement("em", {}, `System: ${agent.system_prompt}`),
-            React.createElement("br"),
-            React.createElement("em", {}, `Task: ${agent.task_prompt}`)
-          ),
-        },
-      });
-
-      if (agent.parent_id) {
-        edges.push({
-          id: `e-${agent.parent_id}-${agent.agent_id}`,
-          source: agent.parent_id,
-          target: agent.agent_id,
-        });
-      }
+  try {
+    // Apply ELK layout algorithm
+    const layoutedGraph = await elk.layout(graph);
+    console.log("hi1111:layout Graoph", layoutedGraph);
+    // Map updated positions back to ReactFlow format
+    return nodes.map(node => {
+      const layoutNode = layoutedGraph.children?.find(n => n.id === node.id);
+      return {
+        ...node,
+        position: layoutNode
+          ? { x: layoutNode.x || 0, y: layoutNode.y || 0 }
+          : { x: 0, y: 0 },
+      };
     });
-  });
-
-  return { nodes, edges };
+  } catch (error) {
+    console.error("ELK layout error:", error);
+    return nodes; // Return original nodes if layout fails
+  }
 };
+
+export default nodeLayout;

@@ -9,11 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "elkjs": "^0.9.3",
     "next": "15.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.5",
-    "reactflow": "^11.11.4"
+    "reactflow": "^11.11.4",
+    "web-worker": "^1.5.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
